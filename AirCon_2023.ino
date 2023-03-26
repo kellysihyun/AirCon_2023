@@ -25,6 +25,7 @@ int pinILLUM = 33;
 /// CO2, TVOC
 #include <Adafruit_CCS811.h>
 Adafruit_CCS811 ccs;
+int pinResetCCS = 22;
 
 /// Value 기준
 int CO2_BASE = 1000;
@@ -107,6 +108,7 @@ void setup() {
   pinMode(pinServo, INPUT); //전원 차단 효과
 
   pinMode(pinPan, OUTPUT);
+  pinMode(pinResetCCS, OUTPUT);
   
   pinMode(pinDTH, INPUT);
   dht.begin();
@@ -122,7 +124,7 @@ void setup() {
   // myOled.displaySensorData("SiHyun", "Welcom !!");
 
   //myBLESvr.BLEStart();       /// Bluetooth와 wifi 동시 연결은 불가.
-  //myWifiServer.begin();   ///  wifi 연결
+  //myWifiServer.begin();      ///  wifi 연결
   bool _bConnected = false;
   //while(!_bConnected)
   { 
@@ -176,7 +178,7 @@ void ServoOnOff()
 
 void CheckSensorValue()
 {
-  int _temp = round(dht.getTemperature());  // 변수 t에 온도 값을 저장
+  int _temp = round(dht.getTemperature());        // 변수 t에 온도 값을 저장
   if(_temp > -50 && _temp < 100)
     gTemp = _temp;
   int _Hum = gHum = round(dht.getHumidity());     // 변수 h에 습도 값을 저장 
@@ -199,6 +201,11 @@ void CheckSensorValue()
       gCo2 = ccs.geteCO2();
       gVoc = ccs.getTVOC();
       
+      if(gCo2 > 1200) {
+        digitalWrite(pinResetCCS, LOW);
+        delay(10);
+        //digitalWrite(pinResetCCS, HIGH);
+      }
       //Serial.print("CO2: ");     Serial.print(_co2);
       //Serial.print("ppm, TVOC: ");   Serial.println(_tvoc);
     }
